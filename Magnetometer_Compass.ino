@@ -16,7 +16,8 @@ unsigned long Timer_Display = 0;
 // ############################################################################################################################
 struct compassAxisData
 {
-    int X_Axis, Y_Axis, Z_Axis, Angle;
+    int X_Axis, Y_Axis, Z_Axis;
+    float Angle;
 } compass;
 // ############################################################################################################################
 // ######################################### SETUP ############################################################################
@@ -69,7 +70,7 @@ void loop()
         lcd.printString("   ");
         lcd.printNumber(long(compass.Z_Axis), 10, 5);
         lcd.printString("   ");
-        lcd.printNumber(long(compass.Angle),  10, 7);
+        lcd.printNumber(float(compass.Angle), 1, 10, 7);
         lcd.printString("   ");
         // Increase timer
         Timer_Display = millis() + 100;
@@ -100,15 +101,15 @@ void readCompass()
     writeCompass(Compass_Data_Output_Address);
     // Send request to read the axis data
     Wire.requestFrom(Compass_Address, 6);
-    // Finally start reading the data (each axis has two register)
+    /* 
+    Finally start reading the data (each axis has two register)
+    The register are set the following way: x_msb, x_lsb, z_msb, z_lsb, y_msb, y_lsb
+    */
     if(6 <= Wire.available())
     {
-        compass.X_Axis  = Wire.read() << 8; // X msb
-        compass.X_Axis |= Wire.read();      // X lsb
-        compass.Z_Axis  = Wire.read() << 8; // Z msb
-        compass.Z_Axis |= Wire.read();      // Z lsb
-        compass.Y_Axis  = Wire.read() << 8; // Y msb
-        compass.Y_Axis |= Wire.read();      // Y lsb
+        compass.X_Axis  = Wire.read() << 8 | Wire.read();
+        compass.Z_Axis  = Wire.read() << 8 | Wire.read();
+        compass.Y_Axis  = Wire.read() << 8 | Wire.read();
     }
     // Calculate the angle
     compass.Angle = (atan2(-compass.Y_Axis, compass.X_Axis) / M_PI) * 180;
