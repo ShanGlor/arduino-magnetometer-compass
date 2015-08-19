@@ -9,7 +9,8 @@
 #define Compass_Continuous_Mode     0x00
 #define Compass_Data_Output_Address 0x03 // Address 3 = X MSB register
 
-unsigned long Timer = 0;
+unsigned long Timer_Serial  = 0;
+unsigned long Timer_Display = 0;
 // ############################################################################################################################
 // ######################################### AXIS DATA ########################################################################
 // ############################################################################################################################
@@ -43,26 +44,36 @@ void loop()
 {
     // Get the compass data
     readCompass();
-    // Print it to the serial monitor
-    Serial.print("X: ");
-    Serial.print(compass.X_Axis);
-    Serial.print(" | Y: ");
-    Serial.print(compass.Y_Axis);
-    Serial.print(" | Z: ");
-    Serial.print(compass.Z_Axis);
-    Serial.print(" | Angle: ");
-    Serial.println(compass.Angle);
-    // Print it to the display
-    lcd.printNumber(long(compass.X_Axis), 10, 3);
-    lcd.printString("   ");
-    lcd.printNumber(long(compass.Y_Axis), 10, 4);
-    lcd.printString("   ");
-    lcd.printNumber(long(compass.Z_Axis), 10, 5);
-    lcd.printString("   ");
-    lcd.printNumber(long(compass.Angle),  10, 7);
-    lcd.printString("   ");
-    // Pause
-    delay(250);
+    // Send data depending on device and timer
+    // Serial a bit slower than display
+    if (millis() > Timer_Serial)
+    {
+        // Print it to the serial monitor
+        Serial.print("X: ");
+        Serial.print(compass.X_Axis);
+        Serial.print(" | Y: ");
+        Serial.print(compass.Y_Axis);
+        Serial.print(" | Z: ");
+        Serial.print(compass.Z_Axis);
+        Serial.print(" | Angle: ");
+        Serial.println(compass.Angle);
+        // Increase timer
+        Timer_Serial = millis() + 500;
+    }
+    if (millis() > Timer_Display)
+    {
+        // Print it to the display
+        lcd.printNumber(long(compass.X_Axis), 10, 3);
+        lcd.printString("   ");
+        lcd.printNumber(long(compass.Y_Axis), 10, 4);
+        lcd.printString("   ");
+        lcd.printNumber(long(compass.Z_Axis), 10, 5);
+        lcd.printString("   ");
+        lcd.printNumber(long(compass.Angle),  10, 7);
+        lcd.printString("   ");
+        // Increase timer
+        Timer_Display = millis() + 100;
+    }
 }
 // ############################################################################################################################
 // ######################################### WRITE COMPASS ####################################################################
