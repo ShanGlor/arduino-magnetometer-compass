@@ -23,10 +23,10 @@ struct compassAxisData
 void setup()
 {
     // Startup serial and i2c
-  Serial.begin(9600);
-  Wire.begin();
+    Serial.begin(9600);
+    Wire.begin();
     // Send the correct register & mode to the compass
-  writeCompass(Compass_Mode_Register, Compass_Continuous_Mode);
+    writeCompass(Compass_Mode_Register, Compass_Continuous_Mode);
     // Setup the lcd
     lcd.initialize();
     lcd.rotateDisplay180();
