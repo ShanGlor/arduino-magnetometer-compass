@@ -99,7 +99,7 @@ void readCompass()
 {
     // Begin to read the data to the correct address (X MSB register)
     writeCompass(Compass_Data_Output_Address);
-    // Send request to read the axis data
+    // Send request to read the axis data (there are 6 register to read)
     Wire.requestFrom(Compass_Address, 6);
     /* 
     Finally start reading the data (each axis has two register)
@@ -111,9 +111,24 @@ void readCompass()
         compass.Z_Axis  = Wire.read() << 8 | Wire.read();
         compass.Y_Axis  = Wire.read() << 8 | Wire.read();
     }
-    // Calculate the angle
-    compass.Angle = (atan2(-compass.Y_Axis, compass.X_Axis) / M_PI) * 180;
-    // Get the angle (from 0 to 359)
+    /* 
+    Calculate the angle:
+        - angle (radiant) = atan(-y, x)
+        - angle (degrees) = angle (radiant) * (180 / PI)
+    */
+    compass.Angle = atan2(-compass.Y_Axis, compass.X_Axis) * (180 / M_PI);
+    /*
+    Calculate the declination. The formula for this is:
+        (DEGREE + (MINUTES / 60)) / (180 / PI);
+    You can get your declination on http://magnetic-declination.com/
+    Be careful, that you also set it positive or negative.
+
+    The declination for Vienna in Austria is +3°57', and so I set my variables
+    */
+    byte  Declination_Degree = +3;
+    byte  Declination_Minute = 57;
+    float Declination = (Declination_Degree + (Declination_Minute / 60)) / (180 / M_PI);
+    // Finally correct the angle, so it is shown from 0° to 360° (and not from -180° to +180°)
     if (compass.Angle < 0)
         compass.Angle += 360;
 }
