@@ -5,9 +5,9 @@
 #include <Wire.h>                         // Arduino I2C-BUS library
 
 #define HMC5883L_Address             0x1E // 7bit address of HMC5883L
-#define HMC5883L_Mode_Register       0x02
-#define HMC5883L_Continuous_Mode     0x00
-#define HMC5883L_Data_Output_Address 0x03 // Address 3 = X MSB register
+#define HMC5883L_Mode_Register       0x02 // The mode register
+#define HMC5883L_Continuous_Mode     0x00 // Select first mode (0: continous, 1: single, 2: idle)
+#define HMC5883L_Data_Output_Address 0x03 // Address 3 = X MSB register (continues till Y LSB)
 
 unsigned long Timer_Serial  = 0;
 unsigned long Timer_Display = 0;
@@ -30,7 +30,7 @@ void setup()
     writeHMC5883L(HMC5883L_Mode_Register, HMC5883L_Continuous_Mode);
     // Setup the lcd
     lcd.initialize();
-    lcd.rotateDisplay180();
+    lcd.rotateDisplay180(); // My display needs this, maybe yours not
     lcd.printString("COMPASS",  5, 1);
     lcd.printString("X-Axis: ", 2, 3);
     lcd.printString("Y-Axis: ", 2, 4);
@@ -112,6 +112,7 @@ float getAngle()
 // ############################################################################################################################
 void writeHMC5883L(int Parameter_Mode, int Parameter_Data)
 {
+    // Mode register and data have to be sent together !
     Wire.beginTransmission(HMC5883L_Address);
     Wire.write(Parameter_Mode);
     Wire.write(Parameter_Data);
@@ -136,7 +137,7 @@ void readHMC5883L()
     Finally start reading the data (each axis has two register)
     The register are set the following way: x_msb, x_lsb, z_msb, z_lsb, y_msb, y_lsb
     */
-    if(6 <= Wire.available())
+    if (6 <= Wire.available())
     {
         compass.X_Axis  = Wire.read() << 8 | Wire.read();
         compass.Z_Axis  = Wire.read() << 8 | Wire.read();
