@@ -193,7 +193,7 @@ float getAngle()
         - angle (radiant) = atan(-y, x)
         - angle (degrees) = angle (radiant) * (180 / PI)
     */
-    float Angle = (atan2(Y_Value, X_Value)) * (180 / M_PI);
+    float Angle = (atan2(-Y_Value, X_Value)) * (180 / M_PI);
     /*
     Calculate the declination. The formula for this is:
         (DEGREE + (MINUTES / 60)) / (180 / PI);
