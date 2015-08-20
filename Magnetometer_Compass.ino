@@ -4,17 +4,17 @@
 #include <OLED_I2C_128x64_Monochrome.h>
 #include <Wire.h>
 
-#define Compass_Address             0x1E // 7bit address of HMC5883L
-#define Compass_Mode_Register       0x02
-#define Compass_Continuous_Mode     0x00
-#define Compass_Data_Output_Address 0x03 // Address 3 = X MSB register
+#define HMC5883L_Address             0x1E // 7bit address of HMC5883L
+#define HMC5883L_Mode_Register       0x02
+#define HMC5883L_Continuous_Mode     0x00
+#define HMC5883L_Data_Output_Address 0x03 // Address 3 = X MSB register
 
 unsigned long Timer_Serial  = 0;
 unsigned long Timer_Display = 0;
 // ############################################################################################################################
 // ######################################### AXIS DATA ########################################################################
 // ############################################################################################################################
-struct compassAxisData
+struct HMC5883LAxisData
 {
     int X_Axis, Y_Axis, Z_Axis;
     float Angle;
@@ -28,7 +28,7 @@ void setup()
     Serial.begin(9600);
     Wire.begin();
     // Send the correct register & mode to the compass
-    writeCompass(Compass_Mode_Register, Compass_Continuous_Mode);
+    writeHMC5883L(HMC5883L_Mode_Register, HMC5883L_Continuous_Mode);
     // Setup the lcd
     lcd.initialize();
     lcd.rotateDisplay180();
@@ -44,7 +44,7 @@ void setup()
 void loop()
 {
     // Get the compass data
-    readCompass();
+    readHMC5883L();
     // Send data depending on device and timer
     // Serial a bit slower than display
     if (millis() > Timer_Serial)
@@ -79,28 +79,28 @@ void loop()
 // ############################################################################################################################
 // ######################################### WRITE COMPASS ####################################################################
 // ############################################################################################################################
-void writeCompass(int Parameter_Mode, int Parameter_Data)
+void writeHMC5883L(int Parameter_Mode, int Parameter_Data)
 {
-    Wire.beginTransmission(Compass_Address);
+    Wire.beginTransmission(HMC5883L_Address);
     Wire.write(Parameter_Mode);
     Wire.write(Parameter_Data);
     Wire.endTransmission();
 }
-void writeCompass(int Parameter_Data)
+void writeHMC5883L(int Parameter_Data)
 {
-    Wire.beginTransmission(Compass_Address);
+    Wire.beginTransmission(HMC5883L_Address);
     Wire.write(Parameter_Data);
     Wire.endTransmission();
 }
 // ############################################################################################################################
 // ######################################### READ COMPASS #####################################################################
 // ############################################################################################################################
-void readCompass()
+void readHMC5883L()
 {
     // Begin to read the data to the correct address (X MSB register)
-    writeCompass(Compass_Data_Output_Address);
+    writeHMC5883L(HMC5883L_Data_Output_Address);
     // Send request to read the axis data (there are 6 register to read)
-    Wire.requestFrom(Compass_Address, 6);
+    Wire.requestFrom(HMC5883L_Address, 6);
     /* 
     Finally start reading the data (each axis has two register)
     The register are set the following way: x_msb, x_lsb, z_msb, z_lsb, y_msb, y_lsb
