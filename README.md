@@ -4,4 +4,4 @@ Besides this module, I also used a small 0,96" OLED display module, which is des
 https://deloarts.wordpress.com/2015/06/17/oled-i%C2%B2c-128x64-monochrome-library/
 
 For further information, please visit:
---- currently no link ---
+https://deloarts.wordpress.com/2015/08/21/magnetometer-compass/
