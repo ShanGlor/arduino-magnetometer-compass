@@ -9,18 +9,14 @@
 #define HMC5883L_Continuous_Mode     0x00 // Select first mode (0: continous, 1: single, 2: idle)
 #define HMC5883L_Data_Output_Address 0x03 // Address 3 = X MSB register (continues till Y LSB)
 
-unsigned long Timer_Serial  = 0;
-unsigned long Timer_Display = 0;
-// ##################################################################################################################### 
-// ######################################### AXIS DATA #################################################################
-// ##################################################################################################################### 
+unsigned long timerSerial  = 0;
+unsigned long timerDisplay = 0;
+
 struct HMC5883LAxisData
 {
-    int X_Axis, Y_Axis, Z_Axis;
+    int X, Y, Z;
 } compass;
-// ##################################################################################################################### 
-// ######################################### SETUP #####################################################################
-// ##################################################################################################################### 
+
 void setup()
 {
     // Startup serial and i2c
@@ -30,54 +26,50 @@ void setup()
     writeHMC5883L(HMC5883L_Mode_Register, HMC5883L_Continuous_Mode);
     // Setup the lcd
     lcd.initialize();
-    lcd.rotateDisplay180(); // My display needs this, maybe yours not
+    lcd.rotateDisplay180();
     lcd.printString("COMPASS",  5, 1);
     lcd.printString("X-Axis: ", 2, 3);
     lcd.printString("Y-Axis: ", 2, 4);
     lcd.printString("Z-Axis: ", 2, 5);
     lcd.printString("Angle: ",  2, 7);
 }
-// ##################################################################################################################### 
-// ######################################### LOOP ######################################################################
-// ##################################################################################################################### 
+ 
 void loop()
 {
     // Get the calculated angle
     float Angle = getAngle();
     // Send data depending on device and timer
     // Serial a bit slower than display
-    if (millis() > Timer_Serial)
+    if (millis() > timerSerial)
     {
         // Print it to the serial monitor
         Serial.print("X: ");
-        Serial.print(compass.X_Axis);
+        Serial.print(compass.X);
         Serial.print(" | Y: ");
-        Serial.print(compass.Y_Axis);
+        Serial.print(compass.Y);
         Serial.print(" | Z: ");
-        Serial.print(compass.Z_Axis);
+        Serial.print(compass.Z);
         Serial.print(" | Angle: ");
         Serial.println(Angle);
         // Increase timer
-        Timer_Serial = millis() + 500;
+        timerSerial = millis() + 500;
     }
-    if (millis() > Timer_Display)
+    if (millis() > timerDisplay)
     {
         // Print it to the display
-        lcd.printNumber(long(compass.X_Axis), 10, 3);
+        lcd.printNumber(long(compass.X), 10, 3);
         lcd.printString("   ");
-        lcd.printNumber(long(compass.Y_Axis), 10, 4);
+        lcd.printNumber(long(compass.Y), 10, 4);
         lcd.printString("   ");
-        lcd.printNumber(long(compass.Z_Axis), 10, 5);
+        lcd.printNumber(long(compass.Z), 10, 5);
         lcd.printString("   ");
         lcd.printNumber(float(Angle), 1, 10, 7);
         lcd.printString("   ");
         // Increase timer
-        Timer_Display = millis() + 100;
+        timerDisplay = millis() + 100;
     }
 }
-// ##################################################################################################################### 
-// ######################################### GET ANGLE #################################################################
-// ##################################################################################################################### 
+
 float getAngle()
 {
     // First of all get the raw data from the HMC5883L module
@@ -87,7 +79,7 @@ float getAngle()
         - angle (radiant) = atan(-y, x)
         - angle (degrees) = angle (radiant) * (180 / PI)
     */
-    float Angle = atan2(-compass.Y_Axis, compass.X_Axis) * (180 / M_PI);
+    float Angle = atan2(-compass.Y, compass.X) * (180 / M_PI);
     /*
     Calculate the declination. The formula for this is:
         (DEGREE + (MINUTES / 60)) / (180 / PI);
@@ -107,26 +99,22 @@ float getAngle()
     else
         return Angle;
 }
-// ##################################################################################################################### 
-// ######################################### WRITE HMC5883L ############################################################
-// ##################################################################################################################### 
-void writeHMC5883L(int Parameter_Mode, int Parameter_Data)
+
+void writeHMC5883L(int mode, int data)
 {
     // Mode register and data have to be sent together !
     Wire.beginTransmission(HMC5883L_Address);
-    Wire.write(Parameter_Mode);
-    Wire.write(Parameter_Data);
+    Wire.write(mode);
+    Wire.write(data);
     Wire.endTransmission();
 }
-void writeHMC5883L(int Parameter_Data)
+void writeHMC5883L(int data)
 {
     Wire.beginTransmission(HMC5883L_Address);
-    Wire.write(Parameter_Data);
+    Wire.write(data);
     Wire.endTransmission();
 }
-// ##################################################################################################################### 
-// ######################################### READ HMC5883L #############################################################
-// ##################################################################################################################### 
+
 void readHMC5883L()
 {
     // Begin to read the data to the correct address (X MSB register)
@@ -139,11 +127,8 @@ void readHMC5883L()
     */
     if (6 <= Wire.available())
     {
-        compass.X_Axis  = Wire.read() << 8 | Wire.read();
-        compass.Z_Axis  = Wire.read() << 8 | Wire.read();
-        compass.Y_Axis  = Wire.read() << 8 | Wire.read();
+        compass.X  = Wire.read() << 8 | Wire.read();
+        compass.Z  = Wire.read() << 8 | Wire.read();
+        compass.Y  = Wire.read() << 8 | Wire.read();
     }
 }
-// ##################################################################################################################### 
-// ######################################### END OF CODE ###############################################################
-// ##################################################################################################################### 
