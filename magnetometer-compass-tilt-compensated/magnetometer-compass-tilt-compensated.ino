@@ -62,7 +62,7 @@ void setup()
     // Send register & mode to accelerometer & gyroscope
     writeMPU6050(MPU6050_Power_Register, MPU6050_Power_Mode);
     // Setup the lcd
-    lcd.initialize();
+    lcd.init(true);
     lcd.rotateDisplay180();
     lcd.printString("COMPASS" , 5, 1);
     lcd.printString("X-Axis: ", 1, 3);

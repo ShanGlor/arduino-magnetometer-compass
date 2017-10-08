@@ -38,7 +38,7 @@ void setup()
     // Send the correct register & mode to the compass
     writeHMC5883L(HMC5883L_Mode_Register, HMC5883L_Continuous_Mode);
     // Setup the lcd
-    lcd.initialize();
+    lcd.init(true);
     lcd.rotateDisplay180();
     // Set all outputs
     pinMode(constStepperIN1, OUTPUT);
@@ -100,7 +100,7 @@ void loop()
             // Set current position
             currentPos = Serial.readStringUntil('\n').toInt();
             // Set lcd
-            lcd.clearDisplay();    
+            lcd.clear();    
             lcd.printString("COMPASS",  5, 1);
             lcd.printString("X-Axis: ", 2, 3);
             lcd.printString("Y-Axis: ", 2, 4);
